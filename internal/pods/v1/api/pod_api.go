@@ -22,13 +22,13 @@ func getAllPodsMetadata(c *gin.Context) {
 	if err != nil {
 		log.Fatalf("Error creating Kubernetes client: %v", err)
 	}
+
 	pods, err := clientset.CoreV1().Pods("").List(c, v1.ListOptions{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error fetching pods: %v", err)})
 		return
 	}
 
-	// Prepare the Pod data for the response
 	var podList []models.Pod
 	for _, pod := range pods.Items {
 		podList = append(podList, models.Pod{
@@ -38,6 +38,5 @@ func getAllPodsMetadata(c *gin.Context) {
 		})
 	}
 
-	// Return the list of Pods as JSON
 	c.JSON(http.StatusOK, podList)
 }
