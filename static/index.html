@@ -1,120 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kubernetes Pods Viewer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f9;
-    }
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    table th, table td {
-      padding: 12px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    table th {
-      background-color: #f2f2f2;
-    }
-    .spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .reload-btn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .reload-btn:hover {
-      background-color: #45a049;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Kubernetes Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 45%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Kubernetes Pods Viewer</h1>
-  </header>
+<h1>Kubernetes Cluster Monitor</h1>
 
-  <div class="container">
-    <button class="reload-btn" onclick="loadPods()">Reload Pods</button>
-    <div id="spinner" class="spinner" style="display: none;"></div>
-    <table id="podsTable" style="margin-top: 20px;">
-      <thead>
-        <tr>
-          <th>Namespace</th>
-          <th>Pod Name</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-  </div>
+<div class="container">
+    <!-- Pods -->
+    <div class="card">
+        <h2>Pods</h2>
+        <table id="pods-table">
+            <thead>
+                <tr>
+                    <th>Namespace</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
 
-  <script>
-    function loadPods() {
-      document.getElementById('spinner').style.display = 'inline-block';
+            </tbody>
+        </table>
+    </div>
 
-      fetch('/v1/pods/metadata')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('spinner').style.display = 'none';
+    <!-- Kustomizations -->
+    <div class="card">
+        <h2>Kustomizations</h2>
+        <table id="kustomizations-table">
+            <thead>
+                <tr>
+                    <th>Namespace</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>last_applied_revision</th>
+                    <th>last_attemped_revision</th>
+                </tr>
+            </thead>
+            <tbody>
 
-          const tbody = document.querySelector('#podsTable tbody');
-          tbody.innerHTML = ''; 
-          data.forEach(pod => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${pod.namespace}</td>
-              <td>${pod.name}</td>
-              <td>${pod.status}</td>
-            `;
-            tbody.appendChild(row);
-          });
-        })
-        .catch(error => {
-          console.error('Error loading pods:', error);
-          alert('Error loading data. Please try again.');
-        });
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadPods() {
+        try {
+            const response = await fetch('/v1/pods/metadata');
+            const pods = await response.json();
+            const table = document.getElementById('pods-table').getElementsByTagName('tbody')[0];
+
+            pods.forEach(pod => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = pod.namespace;
+                row.insertCell(1).innerText = pod.name;
+                row.insertCell(2).innerText = pod.status;
+            });
+        } catch (error) {
+            console.error('Error loading pods:', error);
+        }
     }
 
-    window.onload = loadPods;
-  </script>
+    async function loadKustomizations() {
+        try {
+            const response = await fetch('/v1/kustomizations/metadata');
+            const kustomizations = await response.json();
+            const table = document.getElementById('kustomizations-table').getElementsByTagName('tbody')[0];
+
+            kustomizations.forEach(kustomization => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = kustomization.namespace;
+                row.insertCell(1).innerText = kustomization.name;
+                row.insertCell(2).innerText = kustomization.status;
+                row.insertCell(3).innerText = kustomization.last_applied_revision;
+                row.insertCell(4).innerText = kustomization.last_attemped_revision;
+            });
+        } catch (error) {
+            console.error('Error loading kustomizations:', error);
+        }
+    }
+
+    window.onload = function() {
+        loadPods();
+        loadKustomizations();
+    };
+</script>
 
 </body>
 </html>
