@@ -90,7 +90,7 @@
     function loadPods() {
       document.getElementById('spinner').style.display = 'inline-block';
 
-      fetch('/pods')
+      fetch('/v1/pods/metadata')
         .then(response => response.json())
         .then(data => {
           document.getElementById('spinner').style.display = 'none';
