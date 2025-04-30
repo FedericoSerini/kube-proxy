@@ -14,7 +14,6 @@ import (
 func AddPodsRoutes(c *gin.RouterGroup) {
 	podsRoutes := c.Group("/pods")
 	podsRoutes.GET("/metadata", getAllPodsMetadata)
-	podsRoutes.Static("/view", "./static")
 }
 
 func getAllPodsMetadata(c *gin.Context) {
