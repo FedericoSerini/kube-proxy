@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	getRoutes().Run(":8080")
+	getRoutes().Run(":9998")
 }
 
 func getRoutes() *gin.Engine {
